@@ -30,9 +30,59 @@ func Book(ctx *fiber.Ctx) error {
 }
 
 func CreateBook(ctx *fiber.Ctx) error {
-	if err := ctx.BodyParser(&book); err != nil {
+	err := ctx.BodyParser(&book)
+	if err != nil {
 		return err
 	}
-	database.Db.Create(book)
-	return ctx.JSON(book)
+	recordBook := models.Book{
+		Title: book.Title,
+	}
+
+	createBook := database.Db.Create(&book)
+	if createBook.Error != nil {
+		return ctx.Status(500).JSON(fiber.Map{"message": "Failed to store data"})
+	}
+	return ctx.JSON(fiber.Map{
+		"message": "success",
+		"data":    recordBook,
+	})
+}
+
+func UpdateBook(ctx *fiber.Ctx) error {
+	pk := ctx.Params("pk")
+
+	recordBook := models.Book{
+		Title: book.Title,
+	}
+
+	err := ctx.BodyParser(&book)
+	if err != nil {
+		return err
+	}
+
+	updateBook := database.Db.Model(&book).Where("id = ?", pk).Updates(&book)
+	if updateBook.Error != nil {
+		return ctx.Status(500).JSON(fiber.Map{"message": "Failed to store data"})
+	}
+	return ctx.JSON(fiber.Map{
+		"message": "success",
+		"data":    recordBook,
+	})
+}
+
+func DeleteBook(ctx *fiber.Ctx) error {
+	pk := ctx.Params("pk")
+
+	recordBook := database.Db.First(&book, pk)
+	if recordBook.Error != nil {
+		return ctx.Status(500).JSON(fiber.Map{"message": "Data not found"})
+	}
+
+	deleteBook := database.Db.Delete(&book)
+	if deleteBook.Error != nil {
+		return ctx.Status(500).JSON(fiber.Map{"message": "Failed to delete data"})
+	}
+	return ctx.JSON(fiber.Map{
+		"message": "success",
+	})
 }

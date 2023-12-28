@@ -16,5 +16,5 @@ func ConnectDatabase() {
 }
 
 func RunMigration() {
-	Db.AutoMigrate(&models.Book{}, &models.Author{}, &models.User{})
+	Db.AutoMigrate(&models.Mahasiswa{}, &models.Kategori{}, &models.BobotKategori{}, &models.NilaiMahasiswa{})
 }
